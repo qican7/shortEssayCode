@@ -168,14 +168,13 @@ center = mf*data./((ones(size(data, 2), 1)*sum(mf'))'); % 新聚类中心(5.4)式
 dist = distfcm(center, data);       % 计算距离矩阵  
 obj_fcn = sum(sum((dist.^2).*mf));  % 计算目标函数值 (5.1)式  
 
+tmp = -2.*(expo-2).*dist
 
-U_new = (-2.*(expo-2).*dist.^2 - ones(cluster_n, 1)*sum((-2*expo*dist.^2 + 2*dist.^2)))./(2*dist.^2);
-
-% tmp = dist.^(-2/(expo-1));      
-% U_new = tmp./(ones(cluster_n, 1)*sum(tmp));  % 计算新的隶属度矩阵 (5.3)式  
-expo_new = expo;
+tmp = dist.^(-2/(expo-1));      
+U_new = tmp./(ones(cluster_n, 1)*sum(tmp));  % 计算新的隶属度矩阵 (5.3)式  
+% expo_new = expo;
 % expo_new = sum(sum(U_new.*dist + 2.*dist))./sum(sum(dist)); %m0 = 2
-% expo_new = sum(sum( 6.*U_new.*dist.^2 - U_new.^2.*dist.^2))./sum(sum(2.*U_new.*dist.^2)); %m0 = 3
+expo_new = sum(sum( 6.*U_new.*dist.^2 - U_new.^2.*dist.^2))./sum(sum(2.*U_new.*dist.^2)); %m0 = 2
   
    
   

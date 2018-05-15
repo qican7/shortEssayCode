@@ -27,7 +27,7 @@ clear;
 
 image = double(rgb2gray(imread('FLIR0172.jpg')));
 
-% image = double(rgb2gray(imread('FLIR0322.jpg')));
+% image = double(rgb2gray(imread('FLIR0359.jpg')));
 
 [image_row, image_col] = size(image);
 
@@ -44,6 +44,7 @@ A = zeros(1,U_col);
 
 for i = 1:U_col
     if U(1,i) > U(2,i)
+%     if U(1,i) > 0.7
         A(i) = 0;
     else
         A(i) = 1;
