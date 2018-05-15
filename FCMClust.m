@@ -70,19 +70,21 @@ display = options(4);  % 每次迭代是否输出信息标志
 obj_fcn = zeros(max_iter, 1); % 初始化输出参数obj_fcn  
   
 U = initfcm(cluster_n, data_n);     % 初始化模糊分配矩阵,使U满足列上相加为1,  
+center = [0.2;0.9];
 % Main loop  主要循环  
 for i = 1:max_iter,  
     %在第k步循环中改变聚类中心ceneter,和分配函数U的隶属度值;  
- [U, center, obj_fcn(i),expo] = stepfcm(data, U, cluster_n, expo);  
- if display,  
-  fprintf('FCM:Iteration count = %d, obj. fcn = %f, expo=%f\n', i, obj_fcn(i),expo);  
- end  
- % 终止条件判别  
- if i > 1,  
-  if abs(obj_fcn(i) - obj_fcn(i-1)) < min_impro,  
-            break;  
-        end,  
- end  
+     [U, center, obj_fcn(i),expo] = stepfcm(data, center, cluster_n, expo);  
+%      [U, center, obj_fcn(i),expo] = stepfcm(data, U, cluster_n, expo); 
+     if display,  
+      fprintf('FCM:Iteration count = %d, obj. fcn = %f, expo=%f\n', i, obj_fcn(i),expo);  
+     end  
+     % 终止条件判别  
+     if i > 1,  
+      if abs(obj_fcn(i) - obj_fcn(i-1)) < min_impro,  
+                break;  
+            end,  
+     end  
 end  
   
 iter_n = i; % 实际迭代次数  
@@ -104,7 +106,28 @@ U = U./col_sum(ones(cluster_n, 1), :);
    
   
 % 子函数  
-function [U_new, center, obj_fcn, expo_new] = stepfcm(data, U, cluster_n, expo)  
+% function [U_new, center, obj_fcn, expo_new] = stepfcm(data, U, cluster_n, expo)  
+% % 模糊C均值聚类时迭代的一步  
+% % 输入：  
+% %   data        ---- nxm矩阵,表示n个样本,每个样本具有m的维特征值  
+% %   U           ---- 隶属度矩阵  
+% %   cluster_n   ---- 标量,表示聚合中心数目,即类别数  
+% %   expo        ---- 隶属度矩阵U的指数                       
+% % 输出：  
+% %   U_new       ---- 迭代计算出的新的隶属度矩阵  
+% %   center      ---- 迭代计算出的新的聚类中心  
+% %   obj_fcn     ---- 目标函数值  
+% mf = U.^expo;       % 隶属度矩阵进行指数运算结果  
+% center = mf*data./((ones(size(data, 2), 1)*sum(mf'))'); % 新聚类中心(5.4)式  
+% dist = distfcm(center, data);       % 计算距离矩阵  
+% obj_fcn = sum(sum((dist.^2).*mf));  % 计算目标函数值 (5.1)式  
+% tmp = dist.^(-2/(expo-1));      
+% U_new = tmp./(ones(cluster_n, 1)*sum(tmp));  % 计算新的隶属度矩阵 (5.3)式  
+% % expo_new = expo;
+% expo_new = sum(sum(U_new.*dist + 2.*dist))./sum(sum(dist));
+
+% 子函数  
+function [U_new, center, obj_fcn, expo_new] = stepfcm(data, center, cluster_n, expo)  
 % 模糊C均值聚类时迭代的一步  
 % 输入：  
 %   data        ---- nxm矩阵,表示n个样本,每个样本具有m的维特征值  
@@ -115,14 +138,15 @@ function [U_new, center, obj_fcn, expo_new] = stepfcm(data, U, cluster_n, expo)
 %   U_new       ---- 迭代计算出的新的隶属度矩阵  
 %   center      ---- 迭代计算出的新的聚类中心  
 %   obj_fcn     ---- 目标函数值  
-mf = U.^expo;       % 隶属度矩阵进行指数运算结果  
-center = mf*data./((ones(size(data, 2), 1)*sum(mf'))'); % 新聚类中心(5.4)式  
-dist = distfcm(center, data);       % 计算距离矩阵  
-obj_fcn = sum(sum((dist.^2).*mf));  % 计算目标函数值 (5.1)式  
+
+dist = distfcm(center, data);       % 计算距离矩阵 
 tmp = dist.^(-2/(expo-1));      
 U_new = tmp./(ones(cluster_n, 1)*sum(tmp));  % 计算新的隶属度矩阵 (5.3)式  
-expo_new = expo;
-% expo_new = sum(sum(U_new.*dist + 2.*dist))./sum(sum(dist));
+mf = U_new.^expo;       % 隶属度矩阵进行指数运算结果  
+obj_fcn = sum(sum((dist.^2).*mf));  % 计算目标函数值 (5.1)式  
+center = mf*data./((ones(size(data, 2), 1)*sum(mf'))'); % 新聚类中心(5.4)式  
+% expo_new = expo;
+expo_new = sum(sum(U_new.*dist + 2.*dist))./sum(sum(dist));
   
    
   

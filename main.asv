@@ -56,7 +56,6 @@ B = reshape(A,image_row,image_col);
 
 imshow(B,[]);
 
-
-%imwrite(uint8(B),'FLIR0322_uv_nom.jpg');
+imw
 
 
